@@ -1,0 +1,14 @@
+package routes
+
+import (
+	"github.com/gin-gonic/gin"
+	"facturama-api/controllers"
+)
+
+func RegisterRoutes(router *gin.Engine) {
+	api := router.Group("/api")
+	{
+		api.POST("/cfdi", controllers.CreateCfdi)
+		api.GET("/cfdi", controllers.GetCfdis)
+	}
+}

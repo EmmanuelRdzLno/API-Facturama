@@ -1,0 +1,215 @@
+basePath: /
+definitions:
+  models.CfdiRequest:
+    properties:
+      CfdiType:
+        example: I
+        type: string
+      ExpeditionPlace:
+        example: "20160"
+        type: string
+      GlobalInformation:
+        $ref: '#/definitions/models.GlobalInformation'
+      Items:
+        items:
+          $ref: '#/definitions/models.Item'
+        type: array
+      PaymentForm:
+        example: "01"
+        type: string
+      PaymentMethod:
+        example: PUE
+        type: string
+      Receiver:
+        $ref: '#/definitions/models.Receiver'
+    type: object
+  models.GlobalInformation:
+    properties:
+      Months:
+        example: "07"
+        type: string
+      Periodicity:
+        description: Mensual
+        example: "04"
+        type: string
+      Year:
+        example: 2025
+        type: integer
+    type: object
+  models.Item:
+    properties:
+      Description:
+        example: Ventas mes de Julio
+        type: string
+      ProductCode:
+        example: "31162800"
+        type: string
+      Quantity:
+        example: 1
+        type: number
+      Subtotal:
+        example: 8767.24
+        type: number
+      TaxObject:
+        example: "02"
+        type: string
+      Taxes:
+        items:
+          $ref: '#/definitions/models.Tax'
+        type: array
+      Total:
+        example: 10170
+        type: number
+      Unit:
+        example: Variedad
+        type: string
+      UnitCode:
+        example: AS
+        type: string
+      UnitPrice:
+        example: 8767.24
+        type: number
+    type: object
+  models.Receiver:
+    properties:
+      CfdiUse:
+        example: S01
+        type: string
+      FiscalRegime:
+        example: "616"
+        type: string
+      Name:
+        example: PUBLICO EN GENERAL
+        type: string
+      Rfc:
+        example: XAXX010101000
+        type: string
+      TaxZipCode:
+        example: "20160"
+        type: string
+    type: object
+  models.Tax:
+    properties:
+      Base:
+        example: 8767.24
+        type: number
+      IsFederalTax:
+        example: true
+        type: boolean
+      IsRetention:
+        example: false
+        type: boolean
+      Name:
+        example: IVA
+        type: string
+      Rate:
+        example: 0.16
+        type: number
+      Total:
+        example: 1402.76
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: emmanuelrdz@example.com
+    name: Emmanuel Rdz
+  description: API para generar y consultar facturas CFDI usando Facturama
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: Facturama API
+  version: "1.0"
+paths:
+  /api/cfdi:
+    get:
+      consumes:
+      - application/json
+      description: Devuelve una lista de facturas emitidas con filtros
+      parameters:
+      - description: Tipo de CFDI (issued)
+        in: query
+        name: type
+        type: string
+      - description: Folio inicial
+        in: query
+        name: folioStart
+        type: string
+      - description: Folio final
+        in: query
+        name: folioEnd
+        type: string
+      - description: RFC
+        in: query
+        name: rfc
+        type: string
+      - description: Nombre del receptor
+        in: query
+        name: taxEntityName
+        type: string
+      - description: Fecha inicio (dd/mm/yyyy)
+        in: query
+        name: dateStart
+        type: string
+      - description: Fecha fin (dd/mm/yyyy)
+        in: query
+        name: dateEnd
+        type: string
+      - description: Estado de factura
+        in: query
+        name: status
+        type: string
+      - description: Ordenar por folio
+        in: query
+        name: orderNumber
+        type: boolean
+      - description: Número de página
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Consultar CFDIs emitidos
+      tags:
+      - CFDI
+    post:
+      consumes:
+      - application/json
+      description: Genera una nueva factura CFDI (global o normal)
+      parameters:
+      - description: Datos del CFDI (estructura completa)
+        in: body
+        name: factura
+        required: true
+        schema:
+          $ref: '#/definitions/models.CfdiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Crear CFDI
+      tags:
+      - CFDI
+swagger: "2.0"
