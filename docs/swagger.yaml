@@ -212,4 +212,39 @@ paths:
       summary: Crear CFDI
       tags:
       - CFDI
+  /api/cfdi/{id}/download:
+    get:
+      description: Descarga los archivos XML y PDF de un CFDI existente
+      parameters:
+      - description: ID del CFDI en Facturama
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Formato: xml o pdf'
+        in: query
+        name: format
+        required: true
+        type: string
+      - description: Tipo de CFDI (issued)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Descargar PDF y XML de un CFDI
+      tags:
+      - CFDI
 swagger: "2.0"

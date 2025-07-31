@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -126,4 +127,63 @@ func GetCfdis(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+// DownloadFiles godoc
+// @Summary Descargar PDF y XML de un CFDI
+// @Description Descarga los archivos XML y PDF de un CFDI existente
+// @Tags CFDI
+// @Produce application/octet-stream
+// @Param id path string true "ID del CFDI en Facturama"
+// @Param format query string true "Formato: xml o pdf"
+// @Param type query string true "Tipo de CFDI (issued)"
+// @Success 200 {file} file
+// @Failure 400 {object} map[string]string
+// @Router /api/cfdi/{id}/download [get]
+func DownloadFiles(c *gin.Context) {
+	id := c.Param("id")
+	format := c.Query("format")
+	cfdiType := c.Query("type")
+
+	if format != "xml" && format != "pdf" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato inválido. Usa 'xml' o 'pdf'"})
+		return
+	}
+
+	url := fmt.Sprintf("%s/cfdi/%s/%s/%s", facturamaURL, format, cfdiType, id)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error construyendo solicitud"})
+		return
+	}
+
+	req.SetBasicAuth(os.Getenv("PRODUCTION_FACTURAMA_USER"), os.Getenv("PRODUCTION_FACTURAMA_PASSWORD"))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al contactar Facturama"})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		c.JSON(resp.StatusCode, gin.H{"error": string(body)})
+		return
+	}
+
+	// 👇 Encabezado correcto
+	contentType := "application/octet-stream"
+	if format == "pdf" {
+		contentType = "application/pdf"
+	} else if format == "xml" {
+		contentType = "application/xml"
+	}
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", id, format))
+	c.Header("Content-Type", contentType)
+
+	// ✅ Copiar contenido binario directamente
+	io.Copy(c.Writer, resp.Body)
 }

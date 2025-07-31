@@ -152,6 +152,58 @@
                     }
                 }
             }
+        },
+        "/api/cfdi/{id}/download": {
+            "get": {
+                "description": "Descarga los archivos XML y PDF de un CFDI existente",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "CFDI"
+                ],
+                "summary": "Descargar PDF y XML de un CFDI",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID del CFDI en Facturama",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Formato: xml o pdf",
+                        "name": "format",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tipo de CFDI (issued)",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

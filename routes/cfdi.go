@@ -10,5 +10,6 @@ func RegisterRoutes(router *gin.Engine) {
 	{
 		api.POST("/cfdi", controllers.CreateCfdi)
 		api.GET("/cfdi", controllers.GetCfdis)
+		api.GET("/cfdi/:id/download", controllers.DownloadFiles)
 	}
 }
