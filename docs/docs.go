@@ -163,7 +163,8 @@ const docTemplate = `{
             "get": {
                 "description": "Descarga los archivos XML y PDF de un CFDI existente",
                 "produces": [
-                    "application/octet-stream"
+                    "application/pdf",
+                    " application/xml"
                 ],
                 "tags": [
                     "CFDI"

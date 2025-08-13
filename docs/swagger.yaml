@@ -232,7 +232,8 @@ paths:
         required: true
         type: string
       produces:
-      - application/octet-stream
+      - application/pdf
+      - ' application/xml'
       responses:
         "200":
           description: OK

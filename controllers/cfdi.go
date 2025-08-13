@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
@@ -133,7 +134,7 @@ func GetCfdis(c *gin.Context) {
 // @Summary Descargar PDF y XML de un CFDI
 // @Description Descarga los archivos XML y PDF de un CFDI existente
 // @Tags CFDI
-// @Produce application/octet-stream
+// @Produce application/pdf, application/xml
 // @Param id path string true "ID del CFDI en Facturama"
 // @Param format query string true "Formato: xml o pdf"
 // @Param type query string true "Tipo de CFDI (issued)"
@@ -157,7 +158,6 @@ func DownloadFiles(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error construyendo solicitud"})
 		return
 	}
-
 	req.SetBasicAuth(os.Getenv("PRODUCTION_FACTURAMA_USER"), os.Getenv("PRODUCTION_FACTURAMA_PASSWORD"))
 
 	client := &http.Client{}
@@ -174,16 +174,35 @@ func DownloadFiles(c *gin.Context) {
 		return
 	}
 
-	// 👇 Encabezado correcto
+	// Estructura para parsear la respuesta JSON de Facturama
+	var fileResponse struct {
+		ContentEncoding string `json:"ContentEncoding"`
+		ContentType     string `json:"ContentType"`
+		ContentLength   int    `json:"ContentLength"`
+		Content         string `json:"Content"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&fileResponse); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al interpretar respuesta JSON"})
+		return
+	}
+
+	// Decodificar base64 a bytes
+	data, err := base64.StdEncoding.DecodeString(fileResponse.Content)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al decodificar contenido base64"})
+		return
+	}
+
+	// Establecer Content-Type correcto
 	contentType := "application/octet-stream"
 	if format == "pdf" {
 		contentType = "application/pdf"
 	} else if format == "xml" {
 		contentType = "application/xml"
 	}
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", id, format))
-	c.Header("Content-Type", contentType)
 
-	// ✅ Copiar contenido binario directamente
-	io.Copy(c.Writer, resp.Body)
+	// Responder con el archivo para descarga / visualización
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.%s\"", id, format))
+	c.Data(http.StatusOK, contentType, data)
 }
