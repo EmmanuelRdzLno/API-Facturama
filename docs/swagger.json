@@ -205,6 +205,50 @@
                     }
                 }
             }
+        },
+        "/api/sandbox/cfdi": {
+            "post": {
+                "description": "Genera una nueva factura CFDI (global o normal) en el ambiente de prueba",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CFDI"
+                ],
+                "summary": "Crear CFDI de prueba",
+                "parameters": [
+                    {
+                        "description": "Datos del CFDI (estructura completa)",
+                        "name": "factura",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CfdiRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
