@@ -14,61 +14,6 @@ import (
 )
 
 var facturamaURL = "https://api.facturama.mx"
-var facturamaPruebasURL = "https://apisandbox.facturama.mx"
-
-// CreateTasteCfdi godoc
-// @Summary Crear CFDI de prueba
-// @Description Genera una nueva factura CFDI (global o normal) en el ambiente de prueba
-// @Tags CFDI
-// @Accept json
-// @Produce json
-// @Param factura body models.CfdiRequest true "Datos del CFDI (estructura completa)"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Router /api/sandbox/cfdi [post]
-func CreateTasteCfdi(c *gin.Context) {
-	var factura models.CfdiRequest
-	if err := c.ShouldBindJSON(&factura); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos JSON inválidos"})
-		return
-	}
-
-	jsonData, err := json.Marshal(factura)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al serializar JSON"})
-		return
-	}
-
-	req, err := http.NewRequest("POST", facturamaPruebasURL+"/3/cfdis", bytes.NewBuffer(jsonData))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creando solicitud"})
-		return
-	}
-	req.SetBasicAuth(os.Getenv("TASTE_FACTURAMA_USER"), os.Getenv("FACTURAMA_PASSWORD"))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al contactar Facturama"})
-		return
-	}
-	defer resp.Body.Close()
-
-	var result map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al interpretar respuesta"})
-		return
-	}
-
-	if resp.StatusCode >= 400 {
-		c.JSON(resp.StatusCode, result)
-		return
-	}
-
-	c.JSON(http.StatusOK, result)
-}
 
 // CreateCfdi godoc
 // @Summary Crear CFDI

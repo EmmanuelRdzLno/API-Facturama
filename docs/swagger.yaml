@@ -248,34 +248,4 @@ paths:
       summary: Descargar PDF y XML de un CFDI
       tags:
       - CFDI
-  /api/sandbox/cfdi:
-    post:
-      consumes:
-      - application/json
-      description: Genera una nueva factura CFDI (global o normal) en el ambiente
-        de prueba
-      parameters:
-      - description: Datos del CFDI (estructura completa)
-        in: body
-        name: factura
-        required: true
-        schema:
-          $ref: '#/definitions/models.CfdiRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Crear CFDI de prueba
-      tags:
-      - CFDI
 swagger: "2.0"
